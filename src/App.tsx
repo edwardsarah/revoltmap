@@ -10,8 +10,7 @@ import { ReactFlow,
         addEdge,
         type Connection,
         type Node,
-        type Edge,
-        type OnSelectionChangeFunc
+        type Edge
  } from '@xyflow/react';
  
 import '@xyflow/react/dist/style.css';
@@ -39,7 +38,7 @@ export default function App() {
     customEdge: CustomEdge,
   };
 
-  const getNodeId = () => `randomnode_${+new Date()}`; 
+  const getNodeId = () => `randomnode_${+new Date()}`; //change this so there's consistency across nodes
  
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),
@@ -57,15 +56,17 @@ export default function App() {
     const onAdd = useCallback(() => {
     const newNode = {
       id: getNodeId(),
-      type: "mapNode",
-      data: { label: 'Tell me more', showQuestions: false },
+      type: "question",
+      data: { label: '', questionType: "other" },
       position: {
-        x: (Math.random() - 0.5) * 400,
-        y: (Math.random() - 0.5) * 400,
+        x: (Math.random()) * 400,
+        y: (Math.random()) * 400,
       },
     };
     setNodes((nds) => nds.concat(newNode));
   }, [setNodes]);
+
+  /*
 
   function getNodeById(id: string): Node{
     const foundNode = nodes.find(node => id === node.id)
@@ -80,7 +81,7 @@ export default function App() {
     const usedNodes = nodes.filter(node => node.type !== "question")
 
     setNodes(usedNodes);
-  }
+  } */
 
 /*
   function cleanUpGraph() {
@@ -131,7 +132,7 @@ export default function App() {
         }}
       >
         <Controls /> 
-        <Panel position="top-left">My Map</Panel>
+        <Panel position="top-left">Revolt Map</Panel>
         <MiniMap /> 
         <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
         <Panel position="top-right">
