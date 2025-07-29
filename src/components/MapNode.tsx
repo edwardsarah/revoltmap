@@ -8,15 +8,21 @@ import {
   BaseNodeHeaderTitle,
 } from "@/components/base-node";
 
+import useStore from './../store.ts';
+
 
 export type MapNodeData = {
   label: string;
   showQuestions: boolean;
+  color: string;
 }
 
 export type MapNode = Node<MapNodeData>;
 
 function MapNode({ id, data, selected }:NodeProps<MapNode> ) {
+  const createQuestions = useStore((state) => state.createQuestions);
+  const cleanUpGraph = useStore((state) => state.cleanUpGraph);
+  const isLassoActive = useStore((state) => state.isLassoActive)
 
   const [text, setText] = useState<string>(data.label ?? "");
   //const [showQuestions, setShowQuestions] = useState(data.showQuestions || false);
@@ -25,7 +31,7 @@ function MapNode({ id, data, selected }:NodeProps<MapNode> ) {
 
   function createNewQuestion(questionTypeString: string, spacing: number){
     const sourceNode = getNode(id);
-      if (!sourceNode) return; 
+      if (!sourceNode) return;
 
       const newNodeId = `${id}-${Date.now()}-${Math.floor(Math.random()*10000)}`;
 
@@ -55,11 +61,17 @@ function MapNode({ id, data, selected }:NodeProps<MapNode> ) {
   const hasCreatedQuestions = useRef(false);
 
   useEffect(() => {
-    if (selected && !hasCreatedQuestions.current) {
+    if (selected && !hasCreatedQuestions.current && !isLassoActive) {
+      cleanUpGraph();
+      createQuestions(id, "people", 100)
+      createQuestions(id, "org", 200)
+      createQuestions(id, "movement", 300)
+      createQuestions(id, "other", 400)
+      /*
       createNewQuestion("people", 100)
       createNewQuestion("org", 200)
       createNewQuestion("movement", 300)
-      createNewQuestion("other", 400)
+      createNewQuestion("other", 400) */
       hasCreatedQuestions.current = true
     } 
     if (!selected) {
@@ -70,7 +82,7 @@ function MapNode({ id, data, selected }:NodeProps<MapNode> ) {
 
   return (
     <div className="map-node">
-      <BaseNode>
+      <BaseNode style={{ backgroundColor: data.color}}>
         <BaseNodeContent>
           <input
            id={id}
