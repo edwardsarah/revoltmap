@@ -1,11 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { Handle, Position, useReactFlow, type Edge, type NodeProps, type Node } from '@xyflow/react';
+import { Handle, Position, type NodeProps, type Node } from '@xyflow/react';
 import {
   BaseNode,
-  BaseNodeContent,
-  BaseNodeFooter,
-  BaseNodeHeader,
-  BaseNodeHeaderTitle,
+  BaseNodeContent
 } from "@/components/base-node";
 
 import useStore from './../store.ts';
@@ -23,40 +20,9 @@ function MapNode({ id, data, selected }:NodeProps<MapNode> ) {
   const createQuestions = useStore((state) => state.createQuestions);
   const cleanUpGraph = useStore((state) => state.cleanUpGraph);
   const isLassoActive = useStore((state) => state.isLassoActive)
+  const updateText = useStore((state) => state.updateText);
 
   const [text, setText] = useState<string>(data.label ?? "");
-  //const [showQuestions, setShowQuestions] = useState(data.showQuestions || false);
-
-  const { addNodes, addEdges, getNode } = useReactFlow();
-
-  function createNewQuestion(questionTypeString: string, spacing: number){
-    const sourceNode = getNode(id);
-      if (!sourceNode) return;
-
-      const newNodeId = `${id}-${Date.now()}-${Math.floor(Math.random()*10000)}`;
-
-      const newNode = {
-        id: newNodeId,
-            type: 'question',
-            position: {
-            x: sourceNode.position.x + (Math.random() - 0.5) * 200 + 100 + spacing,
-            y: sourceNode.position.y + (Math.random() - 0.5) * 200 + 100,
-          },
-            data: { label: "", 
-              questionType: questionTypeString}
-          }
-
-      const newEdge: Edge = {
-            id: `${id}-${newNodeId}`,
-            source: id,
-            target: newNodeId,
-            type: 'customEdge',
-            data: {label: ""}
-          }
-      
-      addNodes(newNode);
-      addEdges(newEdge);
-  }
   
   const hasCreatedQuestions = useRef(false);
 
@@ -80,11 +46,17 @@ function MapNode({ id, data, selected }:NodeProps<MapNode> ) {
 
   }, [selected]);
 
+  useEffect(() => {
+    if (text !== data.label) {
+      updateText(id, text);
+    }
+  }, [text])
+
   return (
     <div className="map-node">
       <BaseNode style={{ backgroundColor: data.color}}>
         <BaseNodeContent>
-          <input
+          <textarea
            id={id}
            value={text}
            onChange={(e) => setText(e.target.value)}

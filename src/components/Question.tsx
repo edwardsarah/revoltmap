@@ -10,9 +10,9 @@ type QuestionProps = {
  
 const Question = memo(({ data }: QuestionProps) => {
   const peopleQuestions: string[] = ["Who have they worked with?", "Who have they inspired?", "Who else do they know?"]
-  const orgQuestions: string[] = ["Where do they work?", "What sort of groups are they part of?", "How would you describe their social circle?"]
+  const orgQuestions: string[] = ["Where do they work?", "What's a group they belong to?", "What connects them to someone else?"]
   const movementQuestions: string[] = ["Are they part of a movement?", "How would you categorize what they do?"]
-  const introQuestions: string[] = ["What musician or band do you listen to the most?", "Who is your favorite artist?", "Who wrote your favorite book?", "Who is the most underrated director?"]
+  const introQuestions: string[] = ["Where do you feel most at home?", "Who is your favorite artist?", "Who do you look up to?", "Where is your favorite place in the world?"]
   const otherQuestions: string[] = ["Something else!"]
 
   function getQuestion(questionType: string): string{

@@ -14,7 +14,7 @@ export type CustomEdgeProps = {
     sourcePosition: Position,
     targetPosition: Position,
     data: { label: string }
-    selected: boolean
+    selected: boolean | undefined //fix this later!
 }
  
 export default function CustomEdge({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, data, selected

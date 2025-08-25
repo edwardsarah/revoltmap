@@ -178,6 +178,12 @@
   flex-direction: column;
   border: var(--xy-node-border-default);
   color: var(--xy-node-color, var(--xy-node-color-default));
+  text-wrap: pretty;
+}
+
+.react-flow__node-annotation {
+  background-color: transparent;
+  border: none;
 }
  
 .react-flow__node.selectable:focus {

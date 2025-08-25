@@ -22,16 +22,18 @@ export type RFState = {
     enableLasso: () => void;
     disableLasso: () => void;
     addNode: () => void;
+    addNote: () => void;
     changeColor: (color: string) => void;
+    updateText: (id: string, text: string) => void;
 };
 
 const useStore = createWithEqualityFn<RFState>((set, get) => ({
   nodes: [
             {id: '1', 
             type: 'question', 
-            position: {x: 500, y: 500}, 
+            position: {x: 0, y: 0}, 
             data: {label: "", 
-                    questionType: "intro"}}
+                    questionType: "intro"}},
   ],
 
   edges: [],
@@ -123,11 +125,36 @@ const useStore = createWithEqualityFn<RFState>((set, get) => ({
     set({nodes: [...get().nodes, newNode]})
   },
 
+  addNote: () => {
+    const newNode = {
+      id: `randomnode_${+new Date()}`,
+      type: "annotation",
+      data: { label: "", color: "black"},
+      position: {
+        x: (Math.random()) * 400,
+        y: (Math.random()) * 400,
+      },
+    };
+    set({nodes: [...get().nodes, newNode]})
+  },
+
   changeColor: (color: string) => {
     set({
       nodes: get().nodes.map((node => {
         if (node.selected) {
           return {...node, data: {...node.data, color}}
+        }
+
+        return node;
+      }))
+    })
+  },
+
+  updateText: (id: string, text: string) => {
+    set({
+      nodes: get().nodes.map((node => {
+        if (node.id === id) {
+          return {...node, data: {...node.data, label: text}}
         }
 
         return node;
