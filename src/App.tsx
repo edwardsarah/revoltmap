@@ -103,7 +103,7 @@ export default function App() {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         nodeTypes={nodeTypes}
-        //@ts-expect-error
+        //@ts-expect-error Custom edge type compatibility will be fixed later
         edgeTypes={edgeTypes}
         onConnect={onConnect}
         onNodeDragStart={dragEvents.start}
