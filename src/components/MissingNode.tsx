@@ -6,6 +6,7 @@ import {
 } from "@/components/base-node";
 
 import useStore from './../store.ts';
+import { dot } from 'node:test/reporters';
 
 
 export type MapNodeData = {
@@ -17,34 +18,10 @@ export type MapNodeData = {
 export type MapNode = Node<MapNodeData>;
 
 function MapNode({ id, data, selected }:NodeProps<MapNode> ) {
-  const createQuestions = useStore((state) => state.createQuestions);
-  const cleanUpGraph = useStore((state) => state.cleanUpGraph);
-  const isLassoActive = useStore((state) => state.isLassoActive)
+
   const updateText = useStore((state) => state.updateText);
 
   const [text, setText] = useState<string>(data.label ?? "");
-  
-  const hasCreatedQuestions = useRef(false);
-
-  useEffect(() => {
-    if (selected && !hasCreatedQuestions.current && !isLassoActive) {
-      cleanUpGraph();
-      createQuestions(id, "people", 100)
-      createQuestions(id, "org", 200)
-      createQuestions(id, "movement", 300)
-      createQuestions(id, "other", 400)
-      /*
-      createNewQuestion("people", 100)
-      createNewQuestion("org", 200)
-      createNewQuestion("movement", 300)
-      createNewQuestion("other", 400) */
-      hasCreatedQuestions.current = true
-    } 
-    if (!selected) {
-      hasCreatedQuestions.current = false;
-    }
-
-  }, [selected]);
 
   useEffect(() => {
     if (text !== data.label) {
@@ -54,13 +31,13 @@ function MapNode({ id, data, selected }:NodeProps<MapNode> ) {
 
   return (
     <div >
-      <BaseNode className="map-node" style={{ backgroundColor: data.color}}>
+      <BaseNode className="missing-node" style={{ border: "red dotted"}}>
         <BaseNodeContent>
           <textarea
            id={id}
            value={text}
            onChange={(e) => setText(e.target.value)}
-           placeholder="Type something..." />
+           placeholder="What's missing from this graph?" />
         </BaseNodeContent>
           <Handle type="target" position={Position.Top} />
           <Handle type="source" position={Position.Right} id="a" />

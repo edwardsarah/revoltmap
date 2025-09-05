@@ -1,5 +1,6 @@
 import { useState, memo } from "react";
 import { PlaceholderNode } from "@/components/placeholder-node";
+import { type PlaceholderNodeProps } from "@/components/placeholder-node";
 
 type QuestionProps = {
     data: {
@@ -43,7 +44,7 @@ const Question = memo(({ data }: QuestionProps) => {
   data.label = question;
 
     return (
-    <PlaceholderNode>
+    <PlaceholderNode data = {{category: data.questionType} }>
       <div>{question}</div>
     </PlaceholderNode>
   );

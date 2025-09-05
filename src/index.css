@@ -131,30 +131,29 @@
   touch-action: none;
 }
 
-
 .react-flow {
-  --xy-background-color: #f7f9fb;
+  --xy-background-color: #bfd0ff;
   /* Custom Variables */
   --xy-theme-selected: #f57dbd;
   --xy-theme-hover: #c5c5c5;
   --xy-theme-edge-hover: black;
   --xy-theme-color-focus: #e8e8e8;
- 
+
   /* Built-in Variables see https://reactflow.dev/learn/customization/theming */
   --xy-node-border-default: 1px solid #ededed;
- 
+
   --xy-node-boxshadow-default:
     0px 3.54px 4.55px 0px #00000005, 0px 3.54px 4.55px 0px #0000000d,
     0px 0.51px 1.01px 0px #0000001a;
- 
+
   --xy-node-border-radius-default: 8px;
- 
+
   --xy-handle-background-color-default: #ffffff;
   --xy-handle-border-color-default: #aaaaaa;
- 
+
   --xy-edge-label-color-default: #505050;
 }
- 
+
 .react-flow.dark {
   --xy-node-boxshadow-default:
     0px 3.54px 4.55px 0px rgba(255, 255, 255, 0.05),
@@ -162,13 +161,13 @@
     /* medium shadow */ 0px 0.51px 1.01px 0px rgba(255, 255, 255, 0.2); /* smallest shadow */
   --xy-theme-color-focus: #535353;
 }
- 
+
 /* Customizing Default Theming */
- 
+
 .react-flow__node {
   box-shadow: var(--xy-node-boxshadow-default);
   border-radius: var(--xy-node-border-radius-default);
-  background-color: var(--xy-node-background-color-default);
+  background-color: none;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -176,7 +175,7 @@
   padding: 1px;
   font-size: 12px;
   flex-direction: column;
-  border: var(--xy-node-border-default);
+  border: none;
   color: var(--xy-node-color, var(--xy-node-color-default));
   text-wrap: pretty;
 }
@@ -185,57 +184,58 @@
   background-color: transparent;
   border: none;
 }
- 
+
 .react-flow__node.selectable:focus {
   box-shadow: 0px 0px 0px 4px var(--xy-theme-color-focus);
   border-color: #d9d9d9;
 }
- 
+
 .react-flow__node.selectable:focus:active {
   box-shadow: var(--xy-node-boxshadow-default);
 }
- 
+
 .react-flow__node.selectable:hover,
 .react-flow__node.draggable:hover {
   border-color: var(--xy-theme-hover);
 }
- 
+
 .react-flow__node.selectable.selected {
   border-color: var(--xy-theme-selected);
+  border-radius: var(--xy-node-border-radius-default);
   box-shadow: var(--xy-node-boxshadow-default);
 }
- 
+
 .react-flow__node-group {
   background-color: rgba(207, 182, 255, 0.4);
   border-color: #9e86ed;
 }
- 
+
 .react-flow__edge.selectable:hover .react-flow__edge-path,
 .react-flow__edge.selectable.selected .react-flow__edge-path {
   stroke: var(--xy-theme-edge-hover);
 }
- 
+
 .react-flow__handle {
   background-color: var(--xy-handle-background-color-default);
 }
- 
+
 .react-flow__handle.connectionindicator:hover {
   pointer-events: all;
   border-color: var(--xy-theme-edge-hover);
   background-color: white;
 }
- 
+
 .react-flow__handle.connectionindicator:focus,
 .react-flow__handle.connectingfrom,
 .react-flow__handle.connectingto {
   border-color: var(--xy-theme-edge-hover);
 }
- 
+
 .react-flow__node-resizer {
   border-radius: 0;
   border: none;
 }
- 
+
 .react-flow__resize-control.handle {
   background-color: #ffffff;
   border-color: #9e86ed;
@@ -247,17 +247,17 @@
 .xy-theme__button-group {
   display: flex;
   align-items: center;
- 
+
   .xy-theme__button:first-child {
     border-radius: 100px 0 0 100px;
   }
- 
+
   .xy-theme__button:last-child {
     border-radius: 0 100px 100px 0;
     margin: 0;
   }
 }
- 
+
 /* Custom Button Styling */
 .xy-theme__button {
   display: inline-flex;
@@ -275,39 +275,104 @@
   box-shadow: var(--xy-node-boxshadow-default);
   cursor: pointer;
 }
- 
+
 .xy-theme__button.active {
   background-color: var(--color-primary);
   color: white;
   border-color: var(--color-primary);
 }
- 
+
 .xy-theme__button.active:hover,
 .xy-theme__button.active:active {
   background-color: var(--color-primary);
   opacity: 0.9;
 }
- 
+
 .xy-theme__button:hover {
   background-color: var(--xy-controls-button-background-color-hover-default);
 }
- 
+
 .xy-theme__button:active {
   background-color: var(--color-hover-bg);
 }
- 
+
 .xy-theme__button:disabled {
   color: var(--color-disabled);
   opacity: 0.8;
   cursor: not-allowed;
   border: 1px solid var(--color-disabled);
 }
- 
+
 .xy-theme__button > span {
   margin-right: 0.2rem;
 }
- 
+
 /* Add gap between adjacent buttons */
 .xy-theme__button + .xy-theme__button {
   margin-left: 0.3rem;
+}
+
+.sidebar-label {
+  font-size: 12px;
+  margin-bottom: 4px;
+  user-select: none;
+}
+
+.sidebar-items {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2px;
+}
+
+.sidebar-item {
+  opacity: 0.5;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+
+.sidebar-item > svg {
+  stroke: #222;
+}
+
+.sidebar-item:hover {
+  opacity: 1;
+  background-color: var(--background);
+}
+
+.sidebar-item-drag-image {
+  transform: translate(0, 0);
+  position: absolute;
+  top: -100000px;
+  left: -1000000px;
+}
+
+.color-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  outline: none;
+  box-shadow: none;
+  border: 1px solid var(--panel-background);
+  cursor: pointer;
+}
+
+.node-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  background: none;
+  border: none;
+  outline: none;
+  box-shadow: none;
+  color: var(--text);
+}
+
+.node-label::placeholder {
+  color: var(--text);
+  opacity: 0.5;
 }

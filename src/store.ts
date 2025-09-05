@@ -6,7 +6,9 @@ import {
     type OnNodesChange,
     type OnEdgesChange, 
     applyNodeChanges,
-    applyEdgeChanges
+    applyEdgeChanges,
+    addEdge,
+    type Connection
 } from '@xyflow/react';
 
 import { createWithEqualityFn } from 'zustand/traditional';
@@ -16,15 +18,18 @@ export type RFState = {
     edges: Edge[];
     onNodesChange: OnNodesChange;
     onEdgesChange: OnEdgesChange;
+    onConnect: (connection: Connection) => void;
     createQuestions: (sourceId: string, questionType: string, spacing: number) => void;
     cleanUpGraph: () => void;
     isLassoActive: boolean;
     enableLasso: () => void;
     disableLasso: () => void;
     addNode: () => void;
-    addNote: () => void;
+    addNote: (sourceId: string) => void;
     changeColor: (color: string) => void;
     updateText: (id: string, text: string) => void;
+    incrementLikes: (id: string) => void;
+    resetLikes: (id: string) => void;
 };
 
 const useStore = createWithEqualityFn<RFState>((set, get) => ({
@@ -46,6 +51,13 @@ const useStore = createWithEqualityFn<RFState>((set, get) => ({
   onEdgesChange: (changes: EdgeChange[]) => {
     set({
       edges: applyEdgeChanges(changes, get().edges),
+    });
+  },
+
+  onConnect: (connection: Connection) => {
+    if (!connection.source || !connection.target) return;
+    set({
+      edges: addEdge(connection, get().edges),
     });
   },
 
@@ -116,7 +128,7 @@ const useStore = createWithEqualityFn<RFState>((set, get) => ({
     const newNode = {
       id: `randomnode_${+new Date()}`,
       type: "question",
-      data: { label: '', questionType: "other" },
+      data: { label: '', questionType: "intro" },
       position: {
         x: (Math.random()) * 400,
         y: (Math.random()) * 400,
@@ -125,7 +137,7 @@ const useStore = createWithEqualityFn<RFState>((set, get) => ({
     set({nodes: [...get().nodes, newNode]})
   },
 
-  addNote: () => {
+  addNote: (sourceId: string) => {
     const newNode = {
       id: `randomnode_${+new Date()}`,
       type: "annotation",
@@ -135,7 +147,19 @@ const useStore = createWithEqualityFn<RFState>((set, get) => ({
         y: (Math.random()) * 400,
       },
     };
-    set({nodes: [...get().nodes, newNode]})
+    const newEdge: Edge = {
+            id: `${sourceId}-${newNode.id}`,
+            source: sourceId,
+            target: newNode.id,
+            type: 'customEdge',
+            data: {label: ""}
+          }
+
+    set({nodes: [...get().nodes, newNode], 
+        edges: [...get().edges, newEdge]
+
+    })
+    
   },
 
   changeColor: (color: string) => {
@@ -160,6 +184,43 @@ const useStore = createWithEqualityFn<RFState>((set, get) => ({
         return node;
       }))
     })
+  },
+
+  incrementLikes: (id: string) => {
+    set({
+      nodes: get().nodes.map((node => {
+        if (node.id === id) {
+          if (node.data.likes === undefined) {
+            console.error("Node data.likes is undefined");
+          } else if (typeof node.data.likes !== 'number') {
+            console.error("Node data.likes is not a number");
+          } else {
+            console.log(`Incrementing likes for node ${id} from ${node.data.likes} to ${node.data.likes + 1}`);
+            return {...node, data: {...node.data, likes: node.data.likes + 1}};
+        }
+      }
+        return node;
+    }))
+    })
+  },
+
+  resetLikes: (id: string) => {
+    set({
+      nodes: get().nodes.map((node => {
+        if (node.id === id) {
+          if (node.data.likes === undefined) {
+            console.error("Node data.likes is undefined");
+          } else if (typeof node.data.likes !== 'number') {
+            console.error("Node data.likes is not a number");
+          } else {
+            console.log(`Incrementing likes for node ${id} from ${node.data.likes} to ${node.data.likes + 1}`);
+            return {...node, data: {...node.data, likes: 0}};
+        }
+      }
+        return node;
+    }))
+    })
+
   }
 
 }));

@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
+
 import {
   BaseNode,
   BaseNodeContent,
   //BaseNodeFooter,
 } from "./base-node";
-import { type NodeProps, type Node } from '@xyflow/react';
+import { Handle, Position, type NodeProps, type Node } from '@xyflow/react';
 //import { ArrowDownRight } from "lucide-react";
 
 import useStore from './../store.ts';
@@ -34,8 +35,9 @@ function AnnotationNode({ id, data }: NodeProps<AnnotationNode>) {
             id={id}
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Type something..." />
+            placeholder="Add a comment or note!" />
         </BaseNodeContent>
+            <Handle type="target" position={Position.Bottom} />
         </BaseNode>
   );
 }

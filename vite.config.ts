@@ -5,7 +5,7 @@ import react from '@vitejs/plugin-react'
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: 'https://github.com/edwardsarah/revoltmap',
+  base: 'https://edwardsarah.github.io/revoltmap/',
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {

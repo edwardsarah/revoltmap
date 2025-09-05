@@ -1,16 +1,20 @@
+import { type DragEvent, type DragEventHandler } from 'react';
 import { useCallback, useState } from 'react';
 import { ReactFlow,
+    useReactFlow,
         MiniMap,
         Panel,
         Controls,
         Background,
         BackgroundVariant,
+        ConnectionMode,
         useNodesState,
         useEdgesState,
         addEdge,
         type Connection,
         //type Node,
-        type Edge
+        type Edge,
+        type SnapGrid
  } from '@xyflow/react';
 
 import { useShallow } from 'zustand/shallow';
@@ -23,6 +27,13 @@ import useStore, {type RFState} from './store.ts';
 import DownloadButton from './components/DownloadButton.tsx';
 import { Lasso } from './components/Lasso.tsx'
 import useForceLayout from './useForceLayout.ts';
+import ShapeNodeComponent from './components/shape-node';
+import Sidebar from './components/sidebar';
+import MiniMapNode from './components/minimap-node';
+import ShapeMapNode from './components/shape-node/shapemapnode.tsx';
+import { type ShapeNode, type ShapeType } from './components/shape/types';
+import useCursorStateSynced from './collaborationutils/useCursorStateSynced.tsx';
+import Cursors from './collaborationutils/Cursors.tsx';
 //import { create } from 'domain';
 
 const selector = (state: RFState) => ({
@@ -30,6 +41,7 @@ const selector = (state: RFState) => ({
   edges: state.edges,
   onNodesChange: state.onNodesChange,
   onEdgesChange: state.onEdgesChange,
+  onConnect: state.onConnect,
   createQuestions: state.createQuestions,
   isLassoActive: state.isLassoActive,
   enableLasso: state.enableLasso,
@@ -41,7 +53,9 @@ const selector = (state: RFState) => ({
 const nodeTypes = {
   mapNode: MapNode,
   question: Question,
-  annotation: AnnotationNode
+  annotation: AnnotationNode,
+  shape: ShapeNodeComponent,
+  shapeMap: ShapeMapNode
 };
 
 const edgeTypes = { 
@@ -54,46 +68,64 @@ const defaultEdgeOptions = {
 }
  
 export default function App() {
-  //setting up initial nodes and edges
-/*
-  const initialNodes: Node[] = [
-  {id: '1', type: 'question', position: {x: 500, y: 500}, data: {label: "", questionType: "intro"}}
-  ];
-  */
-  const initialEdges: Edge[] = [];
+
 
   //hooks for updating nodes and edges! 
-  const { nodes, edges, onNodesChange, onEdgesChange, createQuestions, isLassoActive, enableLasso, disableLasso, addNode, addNote } = useStore(useShallow(selector));
+  const { nodes, edges, onNodesChange, onEdgesChange, onConnect, createQuestions, isLassoActive, enableLasso, disableLasso, addNode, addNote } = useStore(useShallow(selector));
   const updateNodeColor = useStore((state) => state.changeColor);
 
-  //const setNodes = useNodesState(initialNodes)[1];
-  const setEdges = useEdgesState(initialEdges)[1];
-  console.log(createQuestions, useNodesState) //delete this later
+  //managing collaborative tools
+  const [cursors, onMouseMove] = useCursorStateSynced();
 
   // check box for partial selection
   const [partial, setPartial] = useState(true);
   
-  //types of nodes and edges - keys indicate a string to reference the node in type, the value is the actual object called to render
-
-  //const getNodeId = () => `randomnode_${+new Date()}`; //change this so there's consistency across nodes
-  
+  //FORCE LAYOUT VARIABLES
   const strength = -1200;
   const distance = 150;
 
   const dragEvents = useForceLayout({ strength, distance });
 
-  const onConnect = useCallback(
-    (params: Connection) => setEdges((eds) => addEdge(params, eds)),
-    [setEdges],
-  );
+//shapes example start
+  const snapGrid: SnapGrid = [10, 10];
+  const { screenToFlowPosition, setNodes } = useReactFlow<ShapeNode>();
 
-  const onRestore = () => {
-    console.log("not implemented yet!")
-  }
+  const onDragOver = (evt: DragEvent<HTMLDivElement>) => {
+    evt.preventDefault();
+    evt.dataTransfer.dropEffect = 'move';
+  };
 
-  const onSave = () => {
-    console.log("not implemented yet!")
-  }
+  // this function is called when a node from the sidebar is dropped onto the react flow pane
+  const onDrop: DragEventHandler = (evt: DragEvent<HTMLDivElement>) => {
+    evt.preventDefault();
+    const type = evt.dataTransfer.getData('application/reactflow') as ShapeType;
+
+    // this will convert the pixel position of the node to the react flow coordinate system
+    // so that a node is added at the correct position even when viewport is translated and/or zoomed in
+    const position = screenToFlowPosition({ x: evt.clientX, y: evt.clientY });
+
+    const newNode: ShapeNode = { //type here is wrong and needs to be fixed! 
+      id: Date.now().toString(),
+      type: 'shapeMap',
+      position,
+      style: { width: 100, height: 100 },
+      data: {
+        type,
+        color: '#FAFAFA',
+        label: "",
+        showQuestions: false,
+        likes: 0
+      },
+      selected: true,
+    };
+
+    setNodes((nodes) =>
+      (nodes.map((n) => ({ ...n, selected: false })) as ShapeNode[]).concat([ //i think this is fucking me up
+        newNode,
+      ])
+    );
+  };
+  //shapes example end
 
   return (
     <div style={{ width: '100vw', height: '100vh' }}>
@@ -102,6 +134,8 @@ export default function App() {
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
+        onPointerMove={onMouseMove} //for collaborative cursors
+        connectionMode={ConnectionMode.Loose}
         nodeTypes={nodeTypes}
         //@ts-expect-error Custom edge type compatibility will be fixed later
         edgeTypes={edgeTypes}
@@ -110,55 +144,25 @@ export default function App() {
         onNodeDrag={dragEvents.drag}
         onNodeDragStop={dragEvents.stop}
         defaultEdgeOptions={defaultEdgeOptions}
+        onDrop={onDrop} //shapes exanple
+        snapGrid={snapGrid} //shapes example
+        onDragOver={onDragOver} //shapes example
         fitView
       >
         {isLassoActive && <Lasso partial={partial} />}
         <Controls /> 
-        <Panel position="top-left">Revolt Map
-          <div className="xy-theme__button-group">
-            <button
-              className={`xy-theme__button ${isLassoActive ? 'active' : ''}`}
-              onClick={enableLasso}
-            >
-              Lasso Mode
-            </button>
-            <button
-              className={`xy-theme__button ${!isLassoActive ? 'active' : ''}`}
-              onClick={disableLasso}
-            >
-              Selection Mode
-            </button>
-            <input type="color"
-                  onChange={(evt) => updateNodeColor(evt.target.value)}></input>
-          </div>
- 
-          <label>
-            <input
-              type="checkbox"
-              checked={partial}
-              onChange={() => setPartial((p) => !p)}
-              className="xy-theme__checkbox"
-            />
-            Partial selection
-          </label>
+        <Panel position="top-left">How can we map the things we love?
+          <Sidebar />
         </Panel>
-        <MiniMap /> 
+        <MiniMap zoomable draggable nodeComponent={MiniMapNode} />
         <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
         <Panel position="top-right">
           <DownloadButton />
-          <button className="xy-theme__button" onClick={onSave}>
-            Save
-          </button>
-          <button className="xy-theme__button" onClick={onRestore}>
-            Restore
-          </button>
           <button className="xy-theme__button" onClick={addNode}>
-            Add Node
-          </button>
-          <button className="xy-theme__button" onClick={addNote}>
-            Add Note
+            Start with a New Prompt!
           </button>
       </Panel>
+      <Cursors cursors={cursors} />
       </ReactFlow>
     </div>
   );
